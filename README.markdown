@@ -17,8 +17,8 @@ It's easy:
 RailsBuffer will use a forking helper like zeus or spring.  Just define a variable in your `.vimrc` like:
 
 ```
-let rails-buffer-helper='spring'  # for spring
-let rails-buffer-helper='zeus'    # for zeus
+let rails_buffer_helper='spring'  # for spring
+let rails_buffer_helper='zeus'    # for zeus
 ```
 
 ### Example:
