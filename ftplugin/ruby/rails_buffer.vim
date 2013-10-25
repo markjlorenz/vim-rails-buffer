@@ -7,41 +7,41 @@
 "              really know how it works.
 
 " Reset the CoffeeCompile variables for the current buffer.
-function! s:RubyCompileResetVars()
+function! s:RailsCompileResetVars()
   " Compiled output buffer
-  let b:ruby_compile_buf = -1
-  let b:ruby_compile_pos = []
+  let b:rails_compile_buf = -1
+  let b:rails_compile_pos = []
 endfunction
 
 " Clean things up in the source buffer.
-function! s:RubyCompileClose()
-  exec bufwinnr(b:ruby_compile_src_buf) 'wincmd w'
-  call s:RubyCompileResetVars()
+function! s:RailsCompileClose()
+  exec bufwinnr(b:rails_compile_src_buf) 'wincmd w'
+  call s:RailsCompileResetVars()
 endfunction
 
 " Don't overwrite the CoffeeCompile variables.
-if !exists('b:ruby_compile_buf')
-  call s:RubyCompileResetVars()
+if !exists('b:rails_compile_buf')
+  call s:RailsCompileResetVars()
 endif
 
 " Check here too in case the compiler above isn't loaded.
-if !exists('ruby_compiler')
-  " let ruby_compiler = 'ruby'
+if !exists('rails_compiler')
+  " let rails_compiler = 'rails'
   let temp_file     = ' rails-buffer-tmpfile '
   let wait          = ' & wait; '
   let cat_temp      = ' cat - >> '.temp_file.wait
   let rails         = 'rails'
   let rails_r       = ' '.rails.' r '.temp_file.wait
   let rm_temp       = ' rm '.temp_file
-  let ruby_compiler = cat_temp.rails_r.rm_temp
+  let rails_compiler = cat_temp.rails_r.rm_temp
 endif
 
 " Update the CoffeeCompile buffer given some input lines.
-function! s:RubyCompileUpdate(startline, endline)
+function! s:RailsCompileUpdate(startline, endline)
   let input = join(getline(a:startline, a:endline), "\n")
 
   " Move to the CoffeeCompile buffer.
-  exec bufwinnr(b:ruby_compile_buf) 'wincmd w'
+  exec bufwinnr(b:rails_compile_buf) 'wincmd w'
 
   " Coffee doesn't like empty input.
   if !len(input)
@@ -49,11 +49,11 @@ function! s:RubyCompileUpdate(startline, endline)
   endif
 
   " Compile input.
-  let output = system(g:ruby_compiler, "p ->{\n".input."\n}.call")
+  let output = system(g:rails_compiler, "p ->{\n".input."\n}.call")
 
   " Be sure we're in the CoffeeCompile buffer before overwriting.
-  if exists('b:ruby_compile_buf')
-    echoerr 'Ruby buffers are messed up'
+  if exists('b:rails_compile_buf')
+    echoerr 'Rails buffers are messed up'
     return
   endif
 
@@ -66,22 +66,22 @@ function! s:RubyCompileUpdate(startline, endline)
 
   setlocal filetype=
 
-  call setpos('.', b:ruby_compile_pos)
+  call setpos('.', b:rails_compile_pos)
 endfunction
 
 " Peek at compiled CoffeeScript in a scratch buffer. We handle ranges like this
 " to prevent the cursor from being moved (and its position saved) before the
 " function is called.
-function! s:RubyCompile(startline, endline, args)
+function! s:RailsCompile(startline, endline, args)
   if !executable(g:rails)
-    echoerr "Can't find Ruby `" . g:rails . "`"
+    echoerr "Can't find Rails `" . g:rails . "`"
     return
   endif
 
-  " If in the RubyCompile buffer, switch back to the source buffer and
+  " If in the RailsCompile buffer, switch back to the source buffer and
   " continue.
-  if !exists('b:ruby_compile_buf')
-    exec bufwinnr(b:ruby_compile_src_buf) 'wincmd w'
+  if !exists('b:rails_compile_buf')
+    exec bufwinnr(b:rails_compile_src_buf) 'wincmd w'
   endif
 
   " Parse arguments.
@@ -90,16 +90,16 @@ function! s:RubyCompile(startline, endline, args)
   let size = str2nr(matchstr(a:args, '\<\d\+\>'))
 
   " Determine default split direction.
-  if exists('g:ruby_compile_vert')
+  if exists('g:rails_compile_vert')
     let vert = 1
   else
     let vert = a:args =~ '\<vert\%[ical]\>'
   endif
 
-  let b:ruby_compile_watch = 1
+  let b:rails_compile_watch = 1
 
-  " Build the RubyCompile buffer if it doesn't exist.
-  if bufwinnr(b:ruby_compile_buf) == -1
+  " Build the RailsCompile buffer if it doesn't exist.
+  if bufwinnr(b:rails_compile_buf) == -1
     let src_buf = bufnr('%')
     let src_win = bufwinnr(src_buf)
 
@@ -122,23 +122,23 @@ function! s:RubyCompile(startline, endline, args)
     setlocal bufhidden=wipe buftype=nofile
     setlocal nobuflisted nomodifiable noswapfile nowrap
 
-    autocmd BufWipeout <buffer> call s:RubyCompileClose()
+    autocmd BufWipeout <buffer> call s:RailsCompileClose()
     " Save the cursor when leaving the CoffeeCompile buffer.
-    autocmd BufLeave <buffer> let b:ruby_compile_pos = getpos('.')
+    autocmd BufLeave <buffer> let b:rails_compile_pos = getpos('.')
 
     nnoremap <buffer> <silent> q :hide<CR>
 
-    let b:ruby_compile_src_buf = src_buf
+    let b:rails_compile_src_buf = src_buf
     let buf = bufnr('%')
 
     " Go back to the source buffer and set it up.
-    exec bufwinnr(b:ruby_compile_src_buf) 'wincmd w'
-    let b:ruby_compile_buf = buf
+    exec bufwinnr(b:rails_compile_src_buf) 'wincmd w'
+    let b:rails_compile_buf = buf
   endif
 
-  call s:RubyCompileUpdate(a:startline, a:endline)
+  call s:RailsCompileUpdate(a:startline, a:endline)
 endfunction
 
 " Peek at compiled CoffeeScript.
 command! -range=%  -bar -nargs=* -complete=customlist,
-\        RubyBuffer call s:RubyCompile(<line1>, <line2>, <q-args>)
+\        RailsBuffer call s:RailsCompile(<line1>, <line2>, <q-args>)
