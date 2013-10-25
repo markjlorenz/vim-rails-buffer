@@ -25,16 +25,22 @@ if !exists('b:rails_compile_buf')
 endif
 
 " Check here too in case the compiler above isn't loaded.
-if !exists('rails_compiler')
-  " let rails_compiler = 'rails'
+function! s:LoadRailsCompiler()
+" if !exists('rails_compiler')
+  if !exists('g:rails_buffer_helper')
+    let g:rails_buffer_helper=''
+  endif
+
   let temp_file     = ' rails-buffer-tmpfile '
   let wait          = ' & wait; '
   let cat_temp      = ' cat - >> '.temp_file.wait
-  let rails         = 'rails'
-  let rails_r       = ' '.rails.' r '.temp_file.wait
+  let g:rails_bin   = 'rails'
+  let fork_helper   = ' '.g:rails_buffer_helper.' '
+  let rails_r       = ' '.g:rails_bin.' r '.temp_file.wait
   let rm_temp       = ' rm '.temp_file
-  let rails_compiler = cat_temp.rails_r.rm_temp
-endif
+  let g:rails_compiler = cat_temp.fork_helper.rails_r.rm_temp
+" endif
+endfunction
 
 " Update the CoffeeCompile buffer given some input lines.
 function! s:RailsCompileUpdate(startline, endline)
@@ -73,8 +79,9 @@ endfunction
 " to prevent the cursor from being moved (and its position saved) before the
 " function is called.
 function! s:RailsCompile(startline, endline, args)
-  if !executable(g:rails)
-    echoerr "Can't find Rails `" . g:rails . "`"
+  call s:LoadRailsCompiler()
+  if !executable(g:rails_bin)
+    echoerr "Can't find Rails `" . g:rails_bin . "`"
     return
   endif
 
