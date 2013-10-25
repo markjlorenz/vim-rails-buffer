@@ -36,5 +36,5 @@ Will create a new scratch buffer containing:
 
 ````
 I go to standard out
-#<Person id: nil, cat_id: nil, created_at: nil, updated_at: nil>
+#<Nerd id: nil, cat_id: nil, created_at: nil, updated_at: nil>
 ````
