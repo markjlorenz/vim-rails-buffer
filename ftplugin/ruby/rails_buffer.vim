@@ -9,8 +9,12 @@
 " Reset the CoffeeCompile variables for the current buffer.
 function! s:RailsCompileResetVars()
   " Compiled output buffer
-  let b:rails_compile_buf = -1
-  let b:rails_compile_pos = []
+  if !exists('b:sh_compile_buf')
+    let b:sh_compile_buf = -1
+  endif
+  if !exists('b:sh_compile_pos')
+    let b:sh_compile_pos = []
+  endif
 endfunction
 
 " Clean things up in the source buffer.
