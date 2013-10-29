@@ -9,11 +9,11 @@
 " Reset the CoffeeCompile variables for the current buffer.
 function! s:RailsCompileResetVars()
   " Compiled output buffer
-  if !exists('b:sh_compile_buf')
-    let b:sh_compile_buf = -1
+  if !exists('b:rails_compile_buf')
+    let b:rails_compile_buf = -1
   endif
-  if !exists('b:sh_compile_pos')
-    let b:sh_compile_pos = []
+  if !exists('b:rails_compile_pos')
+    let b:rails_compile_pos = []
   endif
 endfunction
 
@@ -83,6 +83,8 @@ endfunction
 " to prevent the cursor from being moved (and its position saved) before the
 " function is called.
 function! s:RailsCompile(startline, endline, args)
+  call s:RailsCompileResetVars()
+
   call s:LoadRailsCompiler()
   if !executable(g:rails_bin)
     echoerr "Can't find Rails `" . g:rails_bin . "`"
